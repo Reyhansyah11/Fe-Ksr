@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Search, ChevronLeft, ChevronRight, Trash2, Edit } from "lucide-react";
+import Swal from "sweetalert2";
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -36,14 +38,18 @@ function UserManagement() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:3000/api/auth/kasirUsers",
+        "http://localhost:3001/api/auth/kasirUsers",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       setUsers(response.data.users);
     } catch (error) {
-      setError("Gagal mengambil data user");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Gagal mengambil data user",
+      });
     }
   };
 
@@ -58,10 +64,16 @@ function UserManagement() {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:3000/api/auth/register", formData, {
+      await axios.post("http://localhost:3001/api/auth/register", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setSuccess("User berhasil ditambahkan");
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "User berhasil ditambahkan",
+        showConfirmButton: false,
+        timer: 1500,
+      });
       setFormData({
         username: "",
         password: "",
@@ -73,7 +85,11 @@ function UserManagement() {
       });
       fetchUsers();
     } catch (error) {
-      setError(error.response?.data?.error || "Gagal menambahkan user");
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: error.response?.data?.error || "Gagal menambahkan user",
+      });
     }
   };
 
@@ -86,7 +102,7 @@ function UserManagement() {
           Tambah User Kasir
         </h3>
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <label className="text-sm text-gray-600">Username</label>
               <input
@@ -94,7 +110,7 @@ function UserManagement() {
                 name="username"
                 value={formData.username}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg p-[6px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
@@ -105,7 +121,7 @@ function UserManagement() {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg p-[6px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
@@ -116,7 +132,7 @@ function UserManagement() {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg p-[6px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
@@ -127,7 +143,7 @@ function UserManagement() {
                 name="nama_lengkap"
                 value={formData.nama_lengkap}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg p-[6px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
@@ -138,7 +154,7 @@ function UserManagement() {
                 name="alamat"
                 value={formData.alamat}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg p-[6px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
@@ -149,19 +165,21 @@ function UserManagement() {
                 name="toko_id"
                 value={formData.toko_id}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg p-[6px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
           </div>
           {error && <p className="text-red-500 mt-2 text-sm">{error}</p>}
           {success && <p className="text-green-500 mt-2 text-sm">{success}</p>}
-          <button
-            type="submit"
-            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-          >
-            Tambah User
-          </button>
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="mt-4 bg-blue-600 text-white px-4 py-[6px] rounded-lg hover:bg-blue-700 transition duration-200"
+            >
+              Tambah User
+            </button>
+          </div>
         </form>
       </div>
 
@@ -180,7 +198,6 @@ function UserManagement() {
             />
           </div>
         </div>
-
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
@@ -217,42 +234,32 @@ function UserManagement() {
             </tbody>
           </table>
         </div>
-
-        <div className="flex justify-between items-center p-4 border-t">
-          <span className="text-sm text-gray-600">
-            Showing {indexOfFirstUser + 1} to{" "}
-            {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-            {filteredUsers.length} entries
-          </span>
-          <div className="flex gap-2">
+        {/* Pagination */}
+        <div className="flex items-center justify-between px-6 py-4 border-t">
+          <p className="text-sm text-gray-700">
+            Menampilkan {indexOfFirstUser + 1} -{" "}
+            {Math.min(indexOfLastUser, filteredUsers.length)} dari{" "}
+            {filteredUsers.length} user
+          </p>
+          <div className="flex items-center space-x-2">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
             >
-              Previous
+              <ChevronLeft size={20} />
             </button>
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`px-4 py-2 border rounded-lg ${
-                  currentPage === i + 1
-                    ? "bg-blue-600 text-white"
-                    : "hover:bg-gray-50"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
+            <span className="text-sm text-gray-700">
+              Halaman {currentPage} dari {totalPages}
+            </span>
             <button
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
             >
-              Next
+              <ChevronRight size={20} />
             </button>
           </div>
         </div>

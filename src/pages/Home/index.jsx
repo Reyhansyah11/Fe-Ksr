@@ -8,17 +8,21 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
- 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
- 
+
     try {
       const data = await authApi.login(email, password);
+      // Simpan semua informasi user yang diperlukan
       localStorage.setItem("token", data.token);
       localStorage.setItem("access_level", data.user.access_level);
- 
+      localStorage.setItem("toko_id", data.user.toko_id);
+      localStorage.setItem("user_id", data.user.user_id);
+      localStorage.setItem("user_name", data.user.user_name);
+
       if (data.user.access_level === "administrator") {
         navigate("/administrator");
       } else if (data.user.access_level === "kasir") {
@@ -32,7 +36,7 @@ const Login = () => {
       setLoading(false);
     }
   };
- 
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
@@ -40,14 +44,17 @@ const Login = () => {
           <h2 className="text-3xl font-bold text-gray-800">Welcome Back</h2>
           <p className="text-gray-600 mt-2">Please login to your account</p>
         </div>
- 
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8">
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-lg shadow-lg p-8"
+        >
           {error && (
             <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
               <p>{error}</p>
             </div>
           )}
- 
+
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -62,7 +69,7 @@ const Login = () => {
                 required
               />
             </div>
- 
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
@@ -76,7 +83,7 @@ const Login = () => {
                 required
               />
             </div>
- 
+
             <button
               type="submit"
               disabled={loading}
@@ -84,14 +91,30 @@ const Login = () => {
             >
               {loading ? (
                 <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Loading...
                 </span>
               ) : (
-                'Sign In'
+                "Sign In"
               )}
             </button>
           </div>
@@ -99,6 +122,6 @@ const Login = () => {
       </div>
     </div>
   );
- };
+};
 
 export default Login;

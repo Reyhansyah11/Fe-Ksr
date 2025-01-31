@@ -1,55 +1,40 @@
-// src/pages/administrator/Products/index.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Search, ChevronLeft, ChevronRight, Edit } from "lucide-react";
+import Swal from 'sweetalert2';
 
 function ProductManagement() {
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [satuans, setSatuans] = useState([]);
   const [formData, setFormData] = useState({
-    product_name: "",
-    category_id: "",
-    satuan_id: "",
-    isi: 1,
-    harga_beli: "",
+    harga_jual: "",
   });
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  const itemsPerPage = 5;
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const [productsRes, satuanRes, categoryRes] = await Promise.all([
-          axios.get("http://localhost:3000/api/products", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get("http://localhost:3000/api/satuan", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get("http://localhost:3000/api/categories", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-        setProducts(productsRes.data.data);
-        setSatuans(satuanRes.data.data);
-        setCategories(categoryRes.data.data);
-      } catch (error) {
-        setError("Gagal mengambil data");
-      }
-    };
-    fetchData();
+    fetchProducts();
   }, []);
 
   const fetchProducts = async () => {
+    setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:3000/api/products", {
+      const response = await axios.get("http://localhost:3001/api/products/toko", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(response.data.data);
     } catch (error) {
-      setError("Gagal mengambil data produk");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Gagal mengambil data produk',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -62,154 +47,197 @@ function ProductManagement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!editingProduct) return;
+
+    setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:3000/api/products", formData, {
-        headers: { Authorization: `Bearer ${token}` },
+      await axios.patch(
+        `http://localhost:3001/api/products/toko/${editingProduct.product_id}/price`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Harga jual berhasil diperbarui',
+        showConfirmButton: false,
+        timer: 1500
       });
-      setSuccess("Produk berhasil ditambahkan");
-      setFormData({
-        product_name: "",
-        category_id: "",
-        satuan_id: "",
-        isi: 1,
-        harga_beli: "",
-      });
+      
+      setEditingProduct(null);
+      setFormData({ harga_jual: "" });
       fetchProducts();
     } catch (error) {
-      setError(error.response?.data?.message || "Gagal menambahkan produk");
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: error.response?.data?.message || 'Terjadi kesalahan',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Yakin ingin menghapus produk ini?")) {
-      try {
-        const token = localStorage.getItem("token");
-        await axios.delete(`http://localhost:3000/api/products/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        fetchProducts();
-      } catch (error) {
-        setError("Gagal menghapus produk");
-      }
-    }
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+    setFormData({
+      harga_jual: product.harga_jual,
+    });
   };
+
+  const filteredProducts = products.filter((product) =>
+    product.product?.product_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedProducts = filteredProducts.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Manajemen Produk</h2>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-3xl font-bold mb-8 text-gray-800">Manajemen Produk Toko</h2>
 
-      {/* Form Tambah Produk */}
-      <div className="bg-white p-6 rounded-lg shadow mb-6">
-        <h3 className="text-lg font-semibold mb-4">Tambah Produk Baru</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="product_name"
-              placeholder="Nama Produk"
-              value={formData.product_name}
-              onChange={handleInputChange}
-              className="border p-2 rounded w-full"
-              required
-            />
-            <select
-              name="category_id"
-              value={formData.category_id}
-              onChange={handleInputChange}
-              className="border p-2 rounded w-full"
-              required
-            >
-              <option value="">Pilih Kategori</option>
-              {categories.map((category) => (
-                <option key={category.category_id} value={category.category_id}>
-                  {category.category_name}
-                </option>
-              ))}
-            </select>
-            <select
-              name="satuan_id"
-              value={formData.satuan_id}
-              onChange={handleInputChange}
-              className="border p-2 rounded w-full"
-              required
-            >
-              <option value="">Pilih Satuan</option>
-              {satuans.map((satuan) => (
-                <option key={satuan.satuan_id} value={satuan.satuan_id}>
-                  {satuan.satuan_name}
-                </option>
-              ))}
-            </select>
-            <input
-              type="number"
-              name="isi"
-              placeholder="Isi"
-              value={formData.isi}
-              onChange={handleInputChange}
-              className="border p-2 rounded w-full"
-              required
-              min="1"
-            />
-            <input
-              type="number"
-              name="harga_beli"
-              placeholder="Harga Beli"
-              value={formData.harga_beli}
-              onChange={handleInputChange}
-              className="border p-2 rounded w-full"
-              required
-            />
+        {/* Form Edit Harga */}
+        {editingProduct && (
+          <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">
+              Update Harga Jual
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">Nama Produk</label>
+                  <input
+                    type="text"
+                    value={editingProduct.product?.product_name}
+                    className="border border-gray-300 p-2 rounded-lg w-full bg-gray-50"
+                    disabled
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">Harga Jual</label>
+                  <input
+                    type="number"
+                    name="harga_jual"
+                    value={formData.harga_jual}
+                    onChange={handleInputChange}
+                    className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setFormData({ harga_jual: "" });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                >
+                  {isLoading ? "Menyimpan..." : "Update Harga"}
+                </button>
+              </div>
+            </form>
           </div>
-          {error && <p className="text-red-500">{error}</p>}
-          {success && <p className="text-green-500">{success}</p>}
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Tambah Produk
-          </button>
-        </form>
-      </div>
+        )}
 
-      {/* Tabel Produk */}
-      <div className="bg-white rounded-lg shadow overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-2 text-left">Nama Produk</th>
-              <th className="px-4 py-2 text-left">Kategori</th>
-              <th className="px-4 py-2 text-left">Satuan</th>
-              <th className="px-4 py-2 text-left">Isi</th>
-              <th className="px-4 py-2 text-left">Harga Beli</th>
-              <th className="px-4 py-2 text-left">Harga Jual</th>
-              <th className="px-4 py-2 text-left">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {products.map((product) => (
-              <tr key={product.product_id}>
-                <td className="px-4 py-2">{product.product_name}</td>
-                <td className="px-4 py-2">{product.category_name}</td>
-                <td className="px-4 py-2">{product.satuan_name}</td>
-                <td className="px-4 py-2">{product.isi}</td>
-                <td className="px-4 py-2">{product.harga_beli}</td>
-                <td className="px-4 py-2">{product.harga_jual}</td>
-                <td className="px-4 py-2">
-                  <button
-                    onClick={() => handleDelete(product.product_id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Hapus
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Search dan Table */}
+        <div className="bg-white rounded-xl shadow-sm">
+          <div className="p-6 border-b">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Cari produk..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Nama Produk</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Kategori</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Satuan</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Stok</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Harga Jual</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {paginatedProducts.map((tokoProduct) => (
+                  <tr key={tokoProduct.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm text-gray-700">{tokoProduct.product?.product_name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{tokoProduct.product?.category?.category_name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{tokoProduct.product?.satuan?.satuan_name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{tokoProduct.stok}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(tokoProduct.harga_jual)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => handleEdit(tokoProduct)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <Edit size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between px-6 py-4 border-t">
+            <p className="text-sm text-gray-700">
+              Menampilkan {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredProducts.length)} dari {filteredProducts.length} produk
+            </p>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <span className="text-sm text-gray-700">
+                Halaman {currentPage} dari {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-export default ProductManagement;
+export default ProductManagement; 
+

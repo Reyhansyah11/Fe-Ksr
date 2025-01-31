@@ -1,20 +1,26 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
-  const token = localStorage.getItem("token");
+  const adminKasirToken = localStorage.getItem("token");
+  const supplierToken = localStorage.getItem("supplier_token");
   const accessLevel = localStorage.getItem("access_level");
 
-  // Periksa apakah user memiliki akses
+   // Pilih token yang sesuai
+   const token = allowedRole === "supplier" ? supplierToken : adminKasirToken;
+
+  // Periksa apakah token ada (user sudah login)
   if (!token) {
     return <Navigate to="/" replace />;
   }
 
-  if (allowedRole && accessLevel !== allowedRole) {
-    return <Navigate to="/" replace />;
+  // Periksa apakah user memiliki akses ke role tertentu
+  if (allowedRole && accessLevel !== allowedRole && allowedRole !== "supplier") {
+    return <Navigate to="/forbidden" replace />;
   }
 
-  return children;
+  // Jika semua validasi lolos, tampilkan children atau Outlet
+  return children || <Outlet />;
 };
 
 export default ProtectedRoute;

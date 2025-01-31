@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api/auth"; // Harus ada prefix REACT_APP_
+const API_URL = "http://localhost:3001/api/auth"; // Harus ada prefix REACT_APP_
 
 
 const authApi = {
