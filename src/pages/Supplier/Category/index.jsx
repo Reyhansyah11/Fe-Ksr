@@ -3,13 +3,14 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import deleteIcon from "../../../../public/icons/delete.png";
-import editIcon from "../../../../public/icons/edit.png"
+import editIcon from "../../../../public/icons/edit.png";
 
 const CategoryManagementSupplier = () => {
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({ category_name: "" });
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [editCategoryId, setEditCategoryId] = useState(null);  // Menyimpan ID kategori yang sedang diedit
   const categoriesPerPage = 5;
 
   useEffect(() => {
@@ -59,6 +60,47 @@ const CategoryManagementSupplier = () => {
     }
   };
 
+  // Handle edit category
+  const handleEdit = async () => {
+    try {
+      const token = localStorage.getItem("supplier_token");
+      await axios.put(`http://localhost:3001/api/categories/${editCategoryId}`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      Swal.fire("Success", "Kategori berhasil diperbarui", "success");
+      setFormData({ category_name: "" });
+      setEditCategoryId(null);  // Reset the edit category state
+      fetchCategories();
+    } catch (error) {
+      Swal.fire("Error", error.response?.data?.message || "Gagal mengedit kategori", "error");
+    }
+  };
+
+  // Handle delete category
+  const handleDelete = async (categoryId) => {
+    const confirmDelete = await Swal.fire({
+      title: "Anda yakin?",
+      text: "Kategori ini akan dihapus!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (confirmDelete.isConfirmed) {
+      try {
+        const token = localStorage.getItem("supplier_token");
+        await axios.delete(`http://localhost:3001/api/categories/${categoryId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        Swal.fire("Success", "Kategori berhasil dihapus", "success");
+        fetchCategories();
+      } catch (error) {
+        Swal.fire("Error", "Gagal menghapus kategori", "error");
+      }
+    }
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h2 className="text-3xl font-bold mb-8 text-gray-800">Manajemen Kategori</h2>
@@ -89,6 +131,34 @@ const CategoryManagementSupplier = () => {
         </form>
       </div>
 
+      {/* Edit Category Form */}
+      {editCategoryId && (
+        <div className="bg-white p-6 rounded-xl shadow-md mb-8">
+          <h3 className="text-xl font-semibold mb-4 text-gray-700">Edit Kategori</h3>
+          <form onSubmit={handleEdit}>
+            <div>
+              <label className="text-sm text-gray-600">Nama Kategori</label>
+              <input
+                type="text"
+                name="category_name"
+                value={formData.category_name}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded-lg"
+                required
+              />
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg"
+              >
+                Update Kategori
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {/* Table of Categories */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <div className="p-6 border-b">
@@ -117,10 +187,19 @@ const CategoryManagementSupplier = () => {
                 <tr key={category.category_id}>
                   <td className="px-6 py-4 text-gray-800">{category.category_name}</td>
                   <td className="px-6 py-4 text-gray-800">
-                    <button className="text-blue-600 mr-2">
+                    <button
+                      className="text-blue-600 mr-2"
+                      onClick={() => {
+                        setEditCategoryId(category.category_id);
+                        setFormData({ category_name: category.category_name });
+                      }}
+                    >
                       <img src={editIcon} alt="edit" className="w-auto h-7" />
                     </button>
-                    <button className="text-red-600">
+                    <button
+                      className="text-red-600"
+                      onClick={() => handleDelete(category.category_id)}
+                    >
                       <img src={deleteIcon} alt="delete" className="w-auto h-7" />
                     </button>
                   </td>

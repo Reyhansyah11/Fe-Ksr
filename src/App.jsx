@@ -7,8 +7,11 @@ import Dashboard from "./pages/administrator/Dashboard/index";
 import UserManagement from "./pages/administrator/Users/index";
 import ProductManagement from "./pages/administrator/Products/index";
 import SupplierManagement from "./pages/administrator/Suppliers";
+import MemberManagement from "./pages/administrator/Member/index";
 import PurchaseManagement from "./pages/administrator/Purchase";
 import ExpenseReport from "./pages/administrator/ExpenseReport/index";
+import TransactionManagement from "./pages/administrator/Transaction/index";
+import SalesManagement from "./pages/administrator/Sales/index";
 
 import SupplierLogin from "./pages/Supplier/index"; // Login Supplier
 import SupplierLayout from "./pages/Supplier/Layout/index"; // Layout Supplier
@@ -69,6 +72,9 @@ function App() {
           <Route path="suppliers" element={<SupplierManagement />} />
           <Route path="purchase" element={<PurchaseManagement />} />
           <Route path="expense-report" element={<ExpenseReport />} />
+          <Route path="transaction" element={<TransactionManagement />} />
+          <Route path="sales" element={<SalesManagement />} />
+          <Route path="members" element={<MemberManagement />} />
         </Route>
       </Routes>
     </Router>

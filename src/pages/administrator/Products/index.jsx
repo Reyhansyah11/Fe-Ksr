@@ -180,6 +180,7 @@ function ProductManagement() {
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Kategori</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Satuan</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Stok</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Harga Beli</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Harga Jual</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Aksi</th>
                 </tr>
@@ -191,6 +192,9 @@ function ProductManagement() {
                     <td className="px-6 py-4 text-sm text-gray-700">{tokoProduct.product?.category?.category_name}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{tokoProduct.product?.satuan?.satuan_name}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{tokoProduct.stok}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(tokoProduct.harga_beli)}
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-700">
                       {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(tokoProduct.harga_jual)}
                     </td>

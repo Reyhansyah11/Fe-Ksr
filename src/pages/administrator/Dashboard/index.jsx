@@ -10,10 +10,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { Link } from "react-router-dom";
 
-import { Link } from "react-router-dom"; // Tambahkan import ini di bagian atas
-
-// Fungsi untuk memformat angka ke format Rupiah
 const formatToRupiah = (number) => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -23,7 +21,6 @@ const formatToRupiah = (number) => {
   }).format(number);
 };
 
-// Fungsi untuk memformat tanggal
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString("id-ID", {
     weekday: "long",
@@ -34,17 +31,19 @@ const formatDate = (dateString) => {
 function Dashboard() {
   const [stats, setStats] = useState({
     totalUsers: 0,
-    totalSales: "$0",
+    totalMembers: 0,
     activeProducts: 0,
-    monthlyRevenue: "$0",
+    totalSuppliers: 0,
   });
   const [weeklyExpenses, setWeeklyExpenses] = useState([]);
+  const [weeklySales, setWeeklySales] = useState([]);
+  const [recentMembers, setRecentMembers] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem("token");
-        const [usersRes, productsRes, suppliersRes, expensesRes] =
+        const [usersRes, productsRes, suppliersRes, expensesRes, salesRes, membersRes] =
           await Promise.all([
             axios.get("http://localhost:3001/api/auth/kasirUsers", {
               headers: { Authorization: `Bearer ${token}` },
@@ -58,16 +57,29 @@ function Dashboard() {
             axios.get("http://localhost:3001/api/pembelian/weekly-expenses", {
               headers: { Authorization: `Bearer ${token}` },
             }),
+            axios.get("http://localhost:3001/api/penjualan/daily-sales", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get("http://localhost:3001/api/pelanggan", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
           ]);
 
-        setStats((prev) => ({
-          ...prev,
+        const members = membersRes.data.data.filter(pelanggan => pelanggan.is_member);
+        const recentMembersList = members
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .slice(0, 3);
+
+        setStats({
           totalUsers: usersRes.data.users.length,
           activeProducts: productsRes.data.data.length,
           totalSuppliers: suppliersRes.data.data.length,
-        }));
+          totalMembers: members.length,
+        });
 
-        // Format data pengeluaran
+        setRecentMembers(recentMembersList);
+
+        // Format expenses data
         const formattedExpenses = expensesRes.data.data.map((item) => ({
           ...item,
           tanggal: formatDate(item.tanggal),
@@ -75,6 +87,23 @@ function Dashboard() {
         }));
 
         setWeeklyExpenses(formattedExpenses);
+
+        // Format sales data
+        if (salesRes.data.data.sales) {
+          const salesData = salesRes.data.data.sales.map((sale) => ({
+            tanggal: formatDate(sale.tanggal_penjualan),
+            total_penjualan: sale.total_akhir,
+            total_laba: sale.details.reduce((acc, detail) => {
+              const hargaBeliPerUnit = detail.harga_beli / detail.product.isi;
+              const hpp = hargaBeliPerUnit * detail.qty;
+              const penjualan = detail.harga_jual * detail.qty;
+              return acc + (penjualan - hpp);
+            }, 0),
+            total_penjualan_formatted: formatToRupiah(sale.total_akhir),
+          }));
+
+          setWeeklySales(salesData);
+        }
       } catch (error) {
         console.error("Failed to fetch stats:", error);
       }
@@ -102,6 +131,12 @@ function Dashboard() {
       bgColor: "bg-green-500",
       icon: "🏭",
     },
+    {
+      title: "Total Members",
+      value: stats.totalMembers,
+      bgColor: "bg-orange-500",
+      icon: "💳",
+    },
   ];
 
   const quickActions = [
@@ -111,9 +146,9 @@ function Dashboard() {
       link: "/administrator/users",
     },
     {
-      title: "Manage Suppliers",
-      description: "Add or update suppliers",
-      link: "/administrator/suppliers",
+      title: "Manage Members",
+      description: "Manage member accounts",
+      link: "/administrator/members",
     },
     {
       title: "Manage Products",
@@ -122,15 +157,16 @@ function Dashboard() {
     },
   ];
 
-  // Custom Tooltip Component untuk grafik
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-4 border rounded shadow-lg">
           <p className="text-sm font-semibold">{label}</p>
-          <p className="text-sm text-gray-600">
-            Total: {formatToRupiah(payload[0].value)}
-          </p>
+          {payload.map((pld, index) => (
+            <p key={index} className="text-sm text-gray-600">
+              {pld.name}: {formatToRupiah(pld.value)}
+            </p>
+          ))}
         </div>
       );
     }
@@ -138,13 +174,13 @@ function Dashboard() {
   };
 
   return (
-    <div className="p-6 bg-gray-50">
-      <h2 className="text-3xl font-bold mb-8 text-gray-800">
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <h2 className="text-3xl font-bold mb-6 text-gray-800">
         Dashboard Overview
       </h2>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {statItems.map((stat, index) => (
           <div
             key={index}
@@ -165,64 +201,94 @@ function Dashboard() {
         ))}
       </div>
 
-      {/* Chart and Quick Actions Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <h3 className="text-xl font-semibold mb-6 text-gray-800">
-            Pengeluaran Minggu Ini
-          </h3>
-          <div className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={weeklyExpenses}
-                margin={{
-                  top: 5,
-                  right: 30,
-                  left: 20,
-                  bottom: 65,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="tanggal"
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                  interval={0}
-                />
-                <YAxis tickFormatter={formatToRupiah} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="total_pengeluaran"
-                  stroke="#8884d8"
-                  strokeWidth={2}
-                  name="Total Pengeluaran"
-                  dot={{ r: 4 }}
-                  activeDot={{ r: 8 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Charts */}
+        <div className="lg:col-span-2">
+          {/* Sales Chart */}
+          <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+            <h3 className="text-xl font-semibold mb-6 text-gray-800">
+              Penjualan Hari Ini
+            </h3>
+            <div className="h-[350px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={weeklySales} margin={{ top: 5, right: 30, left: 20, bottom: 65 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="tanggal" angle={-45} textAnchor="end" height={60} interval={0} />
+                  <YAxis tickFormatter={formatToRupiah} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Line type="monotone" dataKey="total_penjualan" stroke="#4CAF50" name="Total Penjualan" />
+                  <Line type="monotone" dataKey="total_laba" stroke="#2196F3" name="Total Laba" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Expenses Chart */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h3 className="text-xl font-semibold mb-6 text-gray-800">
+              Pengeluaran Minggu Ini
+            </h3>
+            <div className="h-[350px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={weeklyExpenses} margin={{ top: 5, right: 30, left: 20, bottom: 65 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="tanggal" angle={-45} textAnchor="end" height={60} interval={0} />
+                  <YAxis tickFormatter={formatToRupiah} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Line type="monotone" dataKey="total_pengeluaran" stroke="#8884d8" name="Total Pengeluaran" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <h3 className="text-xl font-semibold mb-6 text-gray-800">
-            Quick Actions
-          </h3>
-          <div className="space-y-4">
-            {quickActions.map((action, index) => (
-              <Link
-                to={action.link}
-                key={index}
-                className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <h4 className="font-semibold text-gray-800">{action.title}</h4>
-                <p className="text-gray-500 text-sm">{action.description}</p>
-              </Link>
-            ))}
+        {/* Recent Members and Quick Actions */}
+        <div>
+          {/* Recent Members */}
+          <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+            <h3 className="text-xl font-semibold mb-6 text-gray-800">
+              Member Terbaru
+            </h3>
+            <div className="space-y-4">
+              {recentMembers.map((member) => (
+                <div key={member.pelanggan_id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h4 className="font-medium text-gray-800">{member.nama_pelanggan}</h4>
+                    <p className="text-sm text-gray-500">ID: {member.member_id}</p>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {new Date(member.created_at).toLocaleDateString('id-ID')}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Link
+              to="/administrator/members"
+              className="block mt-4 text-center text-blue-600 hover:text-blue-800"
+            >
+              Lihat Semua Member
+            </Link>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h3 className="text-xl font-semibold mb-6 text-gray-800">
+              Quick Actions
+            </h3>
+            <div className="grid gap-4">
+              {quickActions.map((action, index) => (
+                <Link
+                  to={action.link}
+                  key={index}
+                  className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <h4 className="font-semibold text-gray-800">{action.title}</h4>
+                  <p className="text-gray-500 text-sm">{action.description}</p>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>

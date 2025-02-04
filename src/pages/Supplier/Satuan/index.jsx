@@ -10,6 +10,7 @@ const SatuanManagementSupplier = () => {
   const [formData, setFormData] = useState({ satuan_name: "" });
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [editSatuanId, setEditSatuanId] = useState(null);  // Menyimpan ID satuan yang sedang diedit
   const satuanPerPage = 5;
 
   useEffect(() => {
@@ -59,6 +60,47 @@ const SatuanManagementSupplier = () => {
     }
   };
 
+  // Handle edit satuan
+  const handleEdit = async () => {
+    try {
+      const token = localStorage.getItem("supplier_token");
+      await axios.put(`http://localhost:3001/api/satuan/${editSatuanId}`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      Swal.fire("Success", "Satuan berhasil diperbarui", "success");
+      setFormData({ satuan_name: "" });
+      setEditSatuanId(null);  // Reset after editing
+      fetchSatuan();
+    } catch (error) {
+      Swal.fire("Error", error.response?.data?.message || "Gagal mengedit satuan", "error");
+    }
+  };
+
+  // Handle delete satuan
+  const handleDelete = async (satuanId) => {
+    const confirmDelete = await Swal.fire({
+      title: "Anda yakin?",
+      text: "Satuan ini akan dihapus!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (confirmDelete.isConfirmed) {
+      try {
+        const token = localStorage.getItem("supplier_token");
+        await axios.delete(`http://localhost:3001/api/satuan/${satuanId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        Swal.fire("Success", "Satuan berhasil dihapus", "success");
+        fetchSatuan();
+      } catch (error) {
+        Swal.fire("Error", "Gagal menghapus satuan", "error");
+      }
+    }
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h2 className="text-3xl font-bold mb-8 text-gray-800">Manajemen Satuan</h2>
@@ -91,6 +133,36 @@ const SatuanManagementSupplier = () => {
         </form>
       </div>
 
+      {/* Edit Satuan Form */}
+      {editSatuanId && (
+        <div className="bg-white p-6 rounded-xl shadow-md mb-8">
+          <h3 className="text-xl font-semibold mb-4 text-gray-700">Edit Satuan</h3>
+          <form onSubmit={handleEdit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm text-gray-600">Nama Satuan</label>
+                <input
+                  type="text"
+                  name="satuan_name"
+                  value={formData.satuan_name}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border border-gray-300 rounded-lg"
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg"
+              >
+                Update Satuan
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {/* Table of Satuan */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <div className="p-6 border-b">
@@ -119,11 +191,20 @@ const SatuanManagementSupplier = () => {
                 <tr key={unit.satuan_id}>
                   <td className="px-6 py-4 text-gray-800">{unit.satuan_name}</td>
                   <td className="px-6 py-4 text-gray-800">
-                    {/* Add edit and delete buttons here */}
-                    <button className="text-blue-600 mr-2">
+                    {/* Edit and Delete Buttons */}
+                    <button
+                      className="text-blue-600 mr-2"
+                      onClick={() => {
+                        setEditSatuanId(unit.satuan_id);
+                        setFormData({ satuan_name: unit.satuan_name });
+                      }}
+                    >
                       <img src={editIcon} alt="edit" className="w-auto h-7" />
                     </button>
-                    <button className="text-red-600">
+                    <button
+                      className="text-red-600"
+                      onClick={() => handleDelete(unit.satuan_id)}
+                    >
                       <img src={deleteIcon} alt="delete" className="w-auto h-7" />
                     </button>
                   </td>
