@@ -1,3 +1,4 @@
+// purchaseService.js
 import axios from 'axios';
 
 const API_URL = "http://localhost:3001/api";
@@ -5,7 +6,8 @@ const API_URL = "http://localhost:3001/api";
 export const getPurchases = async () => {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.get(`${API_URL}/details`, {
+    // Ganti endpoint menjadi /pembelian
+    const response = await axios.get(`${API_URL}/pembelian`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;

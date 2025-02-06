@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, X } from "lucide-react";
+import InvoiceModal from "./components/InvoiceModal";
 
 const SaleTransaction = () => {
   const [products, setProducts] = useState([]);
@@ -15,13 +16,11 @@ const SaleTransaction = () => {
   const [total, setTotal] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [change, setChange] = useState(0);
-
-  // Tambahkan state baru untuk menyimpan riwayat penjualan
   const [salesHistory, setSalesHistory] = useState([]);
-
   const [loading, setLoading] = useState(false);
-
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedSale, setSelectedSale] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -61,7 +60,6 @@ const SaleTransaction = () => {
     }
   };
 
-  // Tambahkan fungsi untuk mengambil data riwayat penjualan
   const fetchSalesHistory = async () => {
     try {
       const response = await axios.get("http://localhost:3001/api/penjualan", {
@@ -205,22 +203,19 @@ const SaleTransaction = () => {
     }
   };
 
-  // Pagination calculations
-  // Flatten sales data dulu
-  const flattenedSales = salesHistory.reduce((acc, sale) => {
-    const details = sale.details.map((detail) => ({
-      ...detail,
-      pelanggan: sale.pelanggan,
-      bayar: sale.bayar,
-      tanggal_penjualan: sale.tanggal_penjualan,
-    }));
-    return [...acc, ...details];
-  }, []);
+  // Mengelompokkan data penjualan berdasarkan no_faktur
+  const groupedSales = salesHistory.map((sale) => ({
+    ...sale,
+    total_amount: sale.details.reduce(
+      (sum, detail) => sum + detail.qty * detail.harga_jual,
+      0
+    ),
+  }));
 
-  // Kemudian hitung pagination berdasarkan data yang sudah di-flatten
-  const totalPages = Math.ceil(flattenedSales.length / itemsPerPage);
+  // Pagination untuk data yang dikelompokkan
+  const totalPages = Math.ceil(groupedSales.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = flattenedSales.slice(
+  const paginatedSales = groupedSales.slice(
     startIndex,
     startIndex + itemsPerPage
   );
@@ -237,7 +232,14 @@ const SaleTransaction = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <div className="grid grid-cols-3 gap-4">
+            <div
+              className="grid grid-cols-3 gap-4"
+              style={{
+                maxHeight: "350px", // Tinggi untuk sekitar 9 produk
+                overflowY: "auto", // Tambahkan scroll vertikal
+                paddingRight: "10px", // Sedikit padding agar scrollbar tidak menutupi konten
+              }}
+            >
               {products
                 .filter((p) =>
                   p?.product?.product_name
@@ -272,9 +274,18 @@ const SaleTransaction = () => {
 
         <div className="col-span-4">
           <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="text-xl font-bold mb-4">Detail Transaksi</h2>
+            <h2 className="text-xl font-bold mb-4 sticky top-0 bg-white z-10">
+              Detail Transaksi
+            </h2>
 
-            <div className="mb-4">
+            <div
+              className="mb-4"
+              style={{
+                maxHeight: "180px", // Sesuaikan tinggi sesuai kebutuhan
+                overflowY: "auto",
+                paddingRight: "10px",
+              }}
+            >
               <select
                 value={customer?.pelanggan_id || ""}
                 onChange={(e) => {
@@ -283,7 +294,7 @@ const SaleTransaction = () => {
                   );
                   setCustomer(selected);
                 }}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded mb-2"
               >
                 <option value="">Pilih Pelanggan</option>
                 {(customers || []).map((c) => (
@@ -292,55 +303,55 @@ const SaleTransaction = () => {
                   </option>
                 ))}
               </select>
+
+              <div className="space-y-1">
+                {(cart || []).map((item) => (
+                  <div
+                    key={item.product_id}
+                    className="flex items-center justify-between p-1 border rounded"
+                  >
+                    <div className="flex-1">
+                      <h4 className="font-medium text-sm">
+                        {item.product?.product_name}
+                      </h4>
+                      <p className="text-xs">
+                        @Rp{item.harga_jual.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        value={item.qty}
+                        onChange={(e) =>
+                          updateQuantity(item.product_id, e.target.value)
+                        }
+                        className="w-12 p-1 border rounded text-center text-sm"
+                        min="1"
+                      />
+                      <button
+                        onClick={() => removeFromCart(item.product_id)}
+                        className="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="space-y-2 mb-4">
-              {(cart || []).map((item) => (
-                <div
-                  key={item.product_id}
-                  className="flex items-center justify-between p-2 border rounded"
-                >
-                  <div className="flex-1">
-                    <h4 className="font-medium">
-                      {item.product?.product_name}
-                    </h4>
-                    <p className="text-sm">
-                      @Rp{item.harga_jual.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      value={item.qty}
-                      onChange={(e) =>
-                        updateQuantity(item.product_id, e.target.value)
-                      }
-                      className="w-16 p-1 border rounded text-center"
-                      min="1"
-                    />
-                    <button
-                      onClick={() => removeFromCart(item.product_id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="border-t pt-4 space-y-2">
-              <div className="flex justify-between">
+            <div className="border-t pt-2 space-y-1">
+              <div className="flex justify-between text-sm">
                 <span>Subtotal:</span>
                 <span>Rp{subtotal.toLocaleString()}</span>
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-green-600 text-sm">
                   <span>Diskon Member:</span>
                   <span>{discount * 100}%</span>
                 </div>
               )}
-              <div className="flex justify-between font-bold">
+              <div className="flex justify-between font-bold text-sm">
                 <span>Total:</span>
                 <span>Rp{total.toLocaleString()}</span>
               </div>
@@ -351,16 +362,16 @@ const SaleTransaction = () => {
                   handlePaymentChange(parseFloat(e.target.value))
                 }
                 placeholder="Jumlah Bayar"
-                className="w-full p-2 border rounded"
+                className="w-full p-1 border rounded text-sm"
               />
-              <div className="flex justify-between text-green-600">
+              <div className="flex justify-between text-green-600 text-sm">
                 <span>Kembalian:</span>
                 <span>Rp{change.toLocaleString()}</span>
               </div>
               <button
                 onClick={handleSubmit}
                 disabled={loading || !cart.length || payment < total}
-                className={`w-full p-2 rounded text-white ${
+                className={`w-full p-2 rounded text-white text-sm ${
                   loading || !cart.length || payment < total
                     ? "bg-gray-400"
                     : "bg-blue-600 hover:bg-blue-700"
@@ -372,85 +383,54 @@ const SaleTransaction = () => {
           </div>
         </div>
       </div>
+
       <div className="col-span-12 bg-white rounded-lg shadow p-4">
-        <h2 className="text-xl font-bold mb-4">Detail Penjualan</h2>
+        <h2 className="text-xl font-bold mb-4">Riwayat Penjualan</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  NO
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  No. Faktur
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  PELANGGAN
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Pelanggan
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  PRODUK
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Tanggal
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  QTY
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  SUBTOTAL
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  BAYAR
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  TANGGAL
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                  Aksi
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedData.map((detail, index) => (
-                <tr
-                  key={`${detail.penjualan_id}-${detail.penjualan_detail_id}`}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {startIndex + index + 1}
+              {paginatedSales.map((sale, index) => (
+                <tr key={sale.no_faktur}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {sale.no_faktur}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {detail.pelanggan
-                      ? detail.pelanggan.nama_pelanggan
-                      : "Non-Member"}
+                    {sale.pelanggan
+                      ? sale.pelanggan.nama_pelanggan
+                      : "Umum"}
                   </td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {detail.product.product_name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                    {detail.qty}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                    Rp {(detail.qty * detail.harga_jual).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                    Rp {detail.bayar.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(detail.tanggal_penjualan).toLocaleDateString(
+                    {new Date(sale.tanggal_penjualan).toLocaleDateString(
                       "id-ID"
                     )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                    <button
+                      onClick={() => {
+                        setSelectedSale(sale);
+                        setShowDetailModal(true);
+                      }}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      <Eye size={20} />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -461,8 +441,8 @@ const SaleTransaction = () => {
         <div className="mt-4 flex items-center justify-between">
           <div className="text-sm text-gray-700">
             Menampilkan {startIndex + 1} -{" "}
-            {Math.min(startIndex + itemsPerPage, flattenedSales.length)} dari{" "}
-            {flattenedSales.length} detail penjualan
+            {Math.min(startIndex + itemsPerPage, groupedSales.length)} dari{" "}
+            {groupedSales.length} penjualan
           </div>
           <div className="flex items-center space-x-2">
             <button
@@ -487,6 +467,16 @@ const SaleTransaction = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Detail Penjualan */}
+      {showDetailModal && selectedSale && (
+        <InvoiceModal
+          showDetailModal={showDetailModal}
+          selectedSale={selectedSale}
+          setSelectedSale={setSelectedSale}
+          setShowDetailModal={setShowDetailModal}
+        />
+      )}
     </div>
   );
 };

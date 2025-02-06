@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, Plus, Edit2, Trash2 } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -11,12 +11,22 @@ const MemberManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState({
     nama_pelanggan: "",
     alamat: "",
     no_hp: "",
     is_member: true,
   });
+
+  const membersPerPage = 5;
+  const indexOfLastMember = currentPage * membersPerPage;
+  const indexOfFirstMember = indexOfLastMember - membersPerPage;
+  const currentMembers = filteredMembers.slice(
+    indexOfFirstMember,
+    indexOfLastMember
+  );
+  const totalPages = Math.ceil(filteredMembers.length / membersPerPage);
 
   // Tambahkan fungsi untuk mengecek status member
   const checkMemberStatus = async () => {
@@ -59,10 +69,9 @@ const MemberManagement = () => {
   // Fetch members on component mount
   useEffect(() => {
     fetchMembers();
-    checkMemberStatus(); // Tambahkan ini
+    checkMemberStatus();
   }, []);
 
-  // Filter members when search term changes
   useEffect(() => {
     const filtered = members.filter(
       (member) =>
@@ -72,6 +81,7 @@ const MemberManagement = () => {
         member.member_id?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredMembers(filtered);
+    setCurrentPage(1); // Reset ke halaman pertama saat melakukan pencarian
   }, [searchTerm, members]);
 
   // Tambahkan fungsi untuk mengaktifkan kembali member
@@ -359,12 +369,12 @@ const MemberManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredMembers.map((member) => (
+                {currentMembers.map((member) => (
                   <tr
                     key={member.pelanggan_id}
                     className={!member.is_member ? "bg-gray-50" : ""}
                   >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium 
                         ${
@@ -422,6 +432,36 @@ const MemberManagement = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between px-6 py-4 border-t">
+            <p className="text-sm text-gray-700">
+              Menampilkan {indexOfFirstMember + 1} -{" "}
+              {Math.min(indexOfLastMember, filteredMembers.length)} dari{" "}
+              {filteredMembers.length} member
+            </p>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <span className="text-sm text-gray-700">
+                Halaman {currentPage} dari {totalPages}
+              </span>
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
           </div>
         </div>
       </div>

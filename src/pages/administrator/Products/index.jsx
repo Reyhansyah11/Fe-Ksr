@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Search, ChevronLeft, ChevronRight, Edit } from "lucide-react";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
 function ProductManagement() {
   const [products, setProducts] = useState([]);
@@ -12,7 +12,7 @@ function ProductManagement() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -23,15 +23,18 @@ function ProductManagement() {
     setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:3001/api/products/toko", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        "http://localhost:3001/api/products/toko",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setProducts(response.data.data);
     } catch (error) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Gagal mengambil data produk',
+        icon: "error",
+        title: "Error",
+        text: "Gagal mengambil data produk",
       });
     } finally {
       setIsLoading(false);
@@ -59,23 +62,23 @@ function ProductManagement() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      
+
       Swal.fire({
-        icon: 'success',
-        title: 'Berhasil',
-        text: 'Harga jual berhasil diperbarui',
+        icon: "success",
+        title: "Berhasil",
+        text: "Harga jual berhasil diperbarui",
         showConfirmButton: false,
-        timer: 1500
+        timer: 1500,
       });
-      
+
       setEditingProduct(null);
       setFormData({ harga_jual: "" });
       fetchProducts();
     } catch (error) {
       Swal.fire({
-        icon: 'error',
-        title: 'Gagal',
-        text: error.response?.data?.message || 'Terjadi kesalahan',
+        icon: "error",
+        title: "Gagal",
+        text: error.response?.data?.message || "Terjadi kesalahan",
       });
     } finally {
       setIsLoading(false);
@@ -89,8 +92,22 @@ function ProductManagement() {
     });
   };
 
+  const formatRupiah = (number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+    }).format(number);
+  };
+
+  const calculateUnitPrice = (harga_beli, isi) => {
+    if (!isi || isi === 0) return 0;
+    return harga_beli / isi;
+  };
+
   const filteredProducts = products.filter((product) =>
-    product.product?.product_name.toLowerCase().includes(searchTerm.toLowerCase())
+    product.product?.product_name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -103,9 +120,11 @@ function ProductManagement() {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold mb-8 text-gray-800">Manajemen Produk Toko</h2>
+        <h2 className="text-3xl font-bold mb-8 text-gray-800">
+          Manajemen Produk Toko
+        </h2>
 
-        {/* Form Edit Harga */}
+        {/* Form Edit */}
         {editingProduct && (
           <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
             <h3 className="text-lg font-semibold mb-4 text-gray-700">
@@ -114,7 +133,9 @@ function ProductManagement() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-sm font-medium text-gray-700">Nama Produk</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Nama Produk
+                  </label>
                   <input
                     type="text"
                     value={editingProduct.product?.product_name}
@@ -123,7 +144,9 @@ function ProductManagement() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-medium text-gray-700">Harga Jual</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Harga Jual
+                  </label>
                   <input
                     type="number"
                     name="harga_jual"
@@ -157,11 +180,14 @@ function ProductManagement() {
           </div>
         )}
 
-        {/* Search dan Table */}
+        {/* Table */}
         <div className="bg-white rounded-xl shadow-sm">
           <div className="p-6 border-b">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="text"
                 placeholder="Cari produk..."
@@ -176,27 +202,59 @@ function ProductManagement() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Nama Produk</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Kategori</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Satuan</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Stok</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Harga Beli</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Harga Jual</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">Aksi</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">
+                    Nama Produk
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">
+                    Kategori
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">
+                    Stok
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">
+                    Harga Beli
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">
+                    Harga Beli per Satuan
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">
+                    Harga Jual
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">
+                    Aksi
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {paginatedProducts.map((tokoProduct) => (
                   <tr key={tokoProduct.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-700">{tokoProduct.product?.product_name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{tokoProduct.product?.category?.category_name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{tokoProduct.product?.satuan?.satuan_name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{tokoProduct.stok}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">
-                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(tokoProduct.harga_beli)}
+                      {tokoProduct.product?.product_name}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700">
-                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(tokoProduct.harga_jual)}
+                      {tokoProduct.product?.category?.category_name}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {tokoProduct.stok}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {formatRupiah(tokoProduct.harga_beli)}
+                      <span className="text-xs text-gray-500 block">
+                        {/* (Satuan: {tokoProduct.product?.satuan?.satuan_name}) */}
+                        ({tokoProduct.product?.satuan?.satuan_name}, Isi:{" "}
+                        {tokoProduct.product?.isi} pcs)
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {formatRupiah(
+                        calculateUnitPrice(
+                          tokoProduct.harga_beli,
+                          tokoProduct.product?.isi
+                        )
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {formatRupiah(tokoProduct.harga_jual)}
                     </td>
                     <td className="px-6 py-4">
                       <button
@@ -215,11 +273,13 @@ function ProductManagement() {
           {/* Pagination */}
           <div className="flex items-center justify-between px-6 py-4 border-t">
             <p className="text-sm text-gray-700">
-              Menampilkan {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredProducts.length)} dari {filteredProducts.length} produk
+              Menampilkan {startIndex + 1} -{" "}
+              {Math.min(startIndex + itemsPerPage, filteredProducts.length)}{" "}
+              dari {filteredProducts.length} produk
             </p>
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
               >
@@ -229,7 +289,9 @@ function ProductManagement() {
                 Halaman {currentPage} dari {totalPages}
               </span>
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
               >
@@ -243,5 +305,4 @@ function ProductManagement() {
   );
 }
 
-export default ProductManagement; 
-
+export default ProductManagement;

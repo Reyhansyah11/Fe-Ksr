@@ -11,6 +11,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Link } from "react-router-dom";
+import usersIcon from "../../../../public/icons/team-management.png";
+import ProductIcon from "../../../../public/icons/features.png"
+import supplierIcon from "../../../../public/icons/market-penetration.png"
+import memberIcon from "../../../../public/icons/membership.png"
 
 const formatToRupiah = (number) => {
   return new Intl.NumberFormat("id-ID", {
@@ -43,29 +47,37 @@ function Dashboard() {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem("token");
-        const [usersRes, productsRes, suppliersRes, expensesRes, salesRes, membersRes] =
-          await Promise.all([
-            axios.get("http://localhost:3001/api/auth/kasirUsers", {
-              headers: { Authorization: `Bearer ${token}` },
-            }),
-            axios.get("http://localhost:3001/api/products/toko", {
-              headers: { Authorization: `Bearer ${token}` },
-            }),
-            axios.get("http://localhost:3001/api/suppliers", {
-              headers: { Authorization: `Bearer ${token}` },
-            }),
-            axios.get("http://localhost:3001/api/pembelian/weekly-expenses", {
-              headers: { Authorization: `Bearer ${token}` },
-            }),
-            axios.get("http://localhost:3001/api/penjualan/daily-sales", {
-              headers: { Authorization: `Bearer ${token}` },
-            }),
-            axios.get("http://localhost:3001/api/pelanggan", {
-              headers: { Authorization: `Bearer ${token}` },
-            }),
-          ]);
+        const [
+          usersRes,
+          productsRes,
+          suppliersRes,
+          expensesRes,
+          salesRes,
+          membersRes,
+        ] = await Promise.all([
+          axios.get("http://localhost:3001/api/auth/kasirUsers", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:3001/api/products/toko", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:3001/api/suppliers", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:3001/api/pembelian/weekly-expenses", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:3001/api/penjualan/daily-sales", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:3001/api/pelanggan", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-        const members = membersRes.data.data.filter(pelanggan => pelanggan.is_member);
+        const members = membersRes.data.data.filter(
+          (pelanggan) => pelanggan.is_member
+        );
         const recentMembersList = members
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
           .slice(0, 3);
@@ -117,25 +129,25 @@ function Dashboard() {
       title: "Total Users",
       value: stats.totalUsers,
       bgColor: "bg-blue-500",
-      icon: "👥",
+      icon: <img src={usersIcon} alt="users" className="w-[45px] h-auto" />,
     },
     {
       title: "Active Products",
       value: stats.activeProducts,
-      bgColor: "bg-purple-500",
-      icon: "📦",
+      bgColor: "bg-yellow-300",
+      icon: <img src={ProductIcon} alt="products" className="w-[45px] h-auto" />,
     },
     {
       title: "Total Suppliers",
       value: stats.totalSuppliers,
       bgColor: "bg-green-500",
-      icon: "🏭",
+      icon: <img src={supplierIcon} alt="supplier" className="w-[45px] h-auto" />,
     },
     {
       title: "Total Members",
       value: stats.totalMembers,
-      bgColor: "bg-orange-500",
-      icon: "💳",
+      bgColor: "bg-pink-500",
+      icon: <img src={memberIcon} alt="member" className="w-[45px] h-auto" />,
     },
   ];
 
@@ -184,18 +196,16 @@ function Dashboard() {
         {statItems.map((stat, index) => (
           <div
             key={index}
-            className="bg-white rounded-xl shadow-md overflow-hidden"
+            className="bg-white rounded-lg shadow-xl overflow-hidden"
           >
-            <div className={`p-4 ${stat.bgColor} text-white`}>
-              <span className="text-2xl">{stat.icon}</span>
-            </div>
-            <div className="p-4">
-              <h3 className="text-gray-500 text-sm font-medium">
-                {stat.title}
-              </h3>
-              <p className="text-2xl font-bold text-gray-800 mt-2">
-                {stat.value}
-              </p>
+            <div
+              className={`flex items-center justify-between p-4 ${stat.bgColor} text-white`}
+            >
+              <span className="text-3xl">{stat.icon}</span>
+              <div className="text-right">
+                <h3 className="text-sm font-medium">{stat.title}</h3>
+                <p className="text-xl font-semibold">{stat.value}</p>
+              </div>
             </div>
           </div>
         ))}
@@ -211,14 +221,33 @@ function Dashboard() {
             </h3>
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={weeklySales} margin={{ top: 5, right: 30, left: 20, bottom: 65 }}>
+                <LineChart
+                  data={weeklySales}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 65 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="tanggal" angle={-45} textAnchor="end" height={60} interval={0} />
+                  <XAxis
+                    dataKey="tanggal"
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                    interval={0}
+                  />
                   <YAxis tickFormatter={formatToRupiah} />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
-                  <Line type="monotone" dataKey="total_penjualan" stroke="#4CAF50" name="Total Penjualan" />
-                  <Line type="monotone" dataKey="total_laba" stroke="#2196F3" name="Total Laba" />
+                  <Line
+                    type="monotone"
+                    dataKey="total_penjualan"
+                    stroke="#4CAF50"
+                    name="Total Penjualan"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="total_laba"
+                    stroke="#2196F3"
+                    name="Total Laba"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -231,13 +260,27 @@ function Dashboard() {
             </h3>
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={weeklyExpenses} margin={{ top: 5, right: 30, left: 20, bottom: 65 }}>
+                <LineChart
+                  data={weeklyExpenses}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 65 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="tanggal" angle={-45} textAnchor="end" height={60} interval={0} />
+                  <XAxis
+                    dataKey="tanggal"
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                    interval={0}
+                  />
                   <YAxis tickFormatter={formatToRupiah} />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
-                  <Line type="monotone" dataKey="total_pengeluaran" stroke="#8884d8" name="Total Pengeluaran" />
+                  <Line
+                    type="monotone"
+                    dataKey="total_pengeluaran"
+                    stroke="#8884d8"
+                    name="Total Pengeluaran"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -253,13 +296,20 @@ function Dashboard() {
             </h3>
             <div className="space-y-4">
               {recentMembers.map((member) => (
-                <div key={member.pelanggan_id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div
+                  key={member.pelanggan_id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
                   <div>
-                    <h4 className="font-medium text-gray-800">{member.nama_pelanggan}</h4>
-                    <p className="text-sm text-gray-500">ID: {member.member_id}</p>
+                    <h4 className="font-medium text-gray-800">
+                      {member.nama_pelanggan}
+                    </h4>
+                    <p className="text-sm text-gray-500">
+                      ID: {member.member_id}
+                    </p>
                   </div>
                   <div className="text-sm text-gray-500">
-                    {new Date(member.created_at).toLocaleDateString('id-ID')}
+                    {new Date(member.created_at).toLocaleDateString("id-ID")}
                   </div>
                 </div>
               ))}
@@ -284,7 +334,9 @@ function Dashboard() {
                   key={index}
                   className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <h4 className="font-semibold text-gray-800">{action.title}</h4>
+                  <h4 className="font-semibold text-gray-800">
+                    {action.title}
+                  </h4>
                   <p className="text-gray-500 text-sm">{action.description}</p>
                 </Link>
               ))}
