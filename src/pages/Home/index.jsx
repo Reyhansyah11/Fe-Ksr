@@ -17,11 +17,11 @@ const Login = () => {
     try {
       const data = await authApi.login(email, password);
       // Simpan semua informasi user yang diperlukan
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("access_level", data.user.access_level);
-      localStorage.setItem("toko_id", data.user.toko_id);
-      localStorage.setItem("user_id", data.user.user_id);
-      localStorage.setItem("user_name", data.user.user_name);
+      // localStorage.setItem("token", data.token);
+      // localStorage.setItem("access_level", data.user.access_level);
+      // localStorage.setItem("toko_id", data.user.toko_id);
+      // localStorage.setItem("user_id", data.user.user_id);
+      // localStorage.setItem("user_name", data.user.user_name);
 
       if (data.user.access_level === "administrator") {
         navigate("/administrator");

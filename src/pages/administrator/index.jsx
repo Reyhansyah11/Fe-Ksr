@@ -101,7 +101,7 @@ function AdminDashboard() {
       confirmButtonText: "Ya, Logout!",
       cancelButtonText: "Batal",
     });
-
+  
     if (result.isConfirmed) {
       try {
         const response = await fetch("http://localhost:3001/api/auth/logout", {
@@ -109,6 +109,13 @@ function AdminDashboard() {
           credentials: "include",
         });
         if (response.ok) {
+          // Hapus hanya data admin
+          localStorage.removeItem("admin_token");
+          localStorage.removeItem("admin_access_level");
+          localStorage.removeItem("admin_toko_id");
+          localStorage.removeItem("admin_user_id");
+          localStorage.removeItem("admin_user_name");
+  
           Swal.fire(
             "Berhasil!",
             "Anda telah keluar dari sistem.",

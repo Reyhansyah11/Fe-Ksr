@@ -41,7 +41,7 @@ const SaleTransaction = () => {
         "http://localhost:3001/api/products/toko",
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+            Authorization: `Bearer ${localStorage.getItem("kasir_token")}`,
           },
         }
       );
@@ -56,7 +56,7 @@ const SaleTransaction = () => {
     try {
       const response = await axios.get("http://localhost:3001/api/pelanggan", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+          Authorization: `Bearer ${localStorage.getItem("kasir_token")}`,
         },
       });
       setCustomers(response.data.data || []);
@@ -68,11 +68,14 @@ const SaleTransaction = () => {
 
   const fetchSalesHistory = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/api/penjualan", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
-        },
-      });
+      const response = await axios.get(
+        "http://localhost:3001/api/penjualan/kasir/history",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("kasir_token")}`,
+          },
+        }
+      );
       setSalesHistory(response.data.data || []);
     } catch (error) {
       toast.error("Gagal mengambil riwayat penjualan");
@@ -184,7 +187,7 @@ const SaleTransaction = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+            Authorization: `Bearer ${localStorage.getItem("kasir_token")}`,
           },
         }
       );
@@ -314,7 +317,7 @@ const SaleTransaction = () => {
 
         <div className="col-span-4">
           <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="text-xl font-bold mb-4 sticky top-0 bg-white z-10">
+            <h2 className="text-xl font-bold mb-2 sticky top-0 bg-white z-10">
               Detail Transaksi
             </h2>
 

@@ -46,7 +46,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const adminToken = localStorage.getItem("admin_token");
         const [
           usersRes,
           productsRes,
@@ -56,22 +56,22 @@ function Dashboard() {
           membersRes,
         ] = await Promise.all([
           axios.get("http://localhost:3001/api/auth/kasirUsers", {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${adminToken}` },
           }),
           axios.get("http://localhost:3001/api/products/toko", {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${adminToken}` },
           }),
           axios.get("http://localhost:3001/api/suppliers", {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${adminToken}` },
           }),
           axios.get("http://localhost:3001/api/pembelian/weekly-expenses", {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${adminToken}` },
           }),
           axios.get("http://localhost:3001/api/penjualan/daily-sales", {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${adminToken}` },
           }),
           axios.get("http://localhost:3001/api/pelanggan", {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${adminToken}` },
           }),
         ]);
 
@@ -134,7 +134,7 @@ function Dashboard() {
     {
       title: "Active Products",
       value: stats.activeProducts,
-      bgColor: "bg-yellow-300",
+      bgColor: "bg-[#fbbf24]",
       icon: <img src={ProductIcon} alt="products" className="w-[45px] h-auto" />,
     },
     {

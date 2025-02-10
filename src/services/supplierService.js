@@ -5,9 +5,9 @@ const API_URL = "http://localhost:3001/api";
 
 export const getSuppliers = async () => {
   try {
-    const token = localStorage.getItem("token");
+    const adminToken = localStorage.getItem("admin_token");
     const response = await axios.get(`${API_URL}/suppliers`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
     return response.data;
   } catch (error) {

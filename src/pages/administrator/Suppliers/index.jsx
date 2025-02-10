@@ -26,9 +26,9 @@ function SupplierManagement() {
   const fetchSuppliers = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      const adminToken = localStorage.getItem("admin_token");
       const response = await axios.get("http://localhost:3001/api/suppliers", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
       setSuppliers(response.data.data);
     } catch (error) {
@@ -61,14 +61,14 @@ function SupplierManagement() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      const adminToken = localStorage.getItem("admin_token");
 
       if (editingSupplier) {
         await axios.put(
           `http://localhost:3001/api/suppliers/${editingSupplier.supplier_id}`,
           formData,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${adminToken}` },
           }
         );
         Swal.fire({
@@ -81,7 +81,7 @@ function SupplierManagement() {
         setEditingSupplier(null);
       } else {
         await axios.post("http://localhost:3001/api/suppliers", formData, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${adminToken}` },
         });
         Swal.fire({
           icon: "success",
@@ -125,9 +125,9 @@ function SupplierManagement() {
     if (result.isConfirmed) {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem("token");
+        const adminToken = localStorage.getItem("admin_token");
         await axios.delete(`http://localhost:3001/api/suppliers/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${adminToken}` },
         });
         Swal.fire({
           icon: "success",

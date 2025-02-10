@@ -1,7 +1,14 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home/index";
-import Kasir from "./pages/Kasir/index";
+
+import KasirDashboard from "./pages/Kasir/index";
+import KasirDashboardHome from "./pages/Kasir/Dashboard/index";
+import SaleTransaction from "./pages/Kasir/Transaction/index";
+import ProductView from "./pages/Kasir/Products/index";
+import MemberManagements from "./pages/Kasir/Member/index";
+import KasirSalesReport from "./pages/Kasir/Sales/index"
+
 import AdminDashboard from "./pages/administrator/index";
 import Dashboard from "./pages/administrator/Dashboard/index";
 import UserManagement from "./pages/administrator/Users/index";
@@ -19,6 +26,7 @@ import DashboardSupplier from "./pages/Supplier/Dashboard/index"; // Dashboard S
 import ProductSupplier from "./pages/Supplier/Products/index"; // Produk Supplier
 import CategoryManagementSupplier from "./pages/Supplier/Category/index";
 import SatuanManagementSupplier from "./pages/Supplier/Satuan/index";
+import ChangePassword from './pages/Supplier/ChangePassword/index'
 
 import ProtectedRoute from "./components/ProtectedRoute/index";
 import Forbidden from "./pages/Forbidden";
@@ -36,10 +44,16 @@ function App() {
           path="/kasir"
           element={
             <ProtectedRoute allowedRole="kasir">
-              <Kasir />
+              <KasirDashboard />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<KasirDashboardHome />} />
+          <Route path="transaction" element={<SaleTransaction />} />
+          <Route path="members" element={<MemberManagements />} />
+          <Route path="products" element={<ProductView />} />
+          <Route path="sales-report" element={<KasirSalesReport />} />
+        </Route>
 
         {/* Supplier Routes */}
         <Route path="/supplier" element={<SupplierLogin />} />
@@ -55,6 +69,7 @@ function App() {
           <Route path="products" element={<ProductSupplier />} />
           <Route path="categories" element={<CategoryManagementSupplier />} />
           <Route path="satuan" element={<SatuanManagementSupplier />} />
+          <Route path="change-password" element={<ChangePassword />} />
         </Route>
 
         {/* Administrator Routes */}

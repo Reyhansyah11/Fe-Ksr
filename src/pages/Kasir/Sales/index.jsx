@@ -58,9 +58,9 @@ function SalesReport() {
       endDateTime.setHours(23, 59, 59, 999);
 
       const response = await axios.get(
-        `http://localhost:3001/api/penjualan/daily-sales`,
+        `http://localhost:3001/api/penjualan/kasir/daily-sales`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem("kasir_token")}` },
           params: {
             startDate: startDateTime.toISOString(),
             endDate: endDateTime.toISOString(),
@@ -170,7 +170,7 @@ function SalesReport() {
                           <th className="px-4 py-2 text-left">Pelanggan</th>
                           <th className="px-4 py-2 text-left">Produk</th>
                           <th className="px-4 py-2 text-left">Detail HPP</th>
-                          <th className="px-4 py-2 text-right">HPP</th>
+                          <th className="px-4 py-2 text-right">Subtotal</th>
                           <th className="px-4 py-2 text-right">Diskon</th>
                           <th className="px-4 py-2 text-right">Total Akhir</th>
                         </tr>

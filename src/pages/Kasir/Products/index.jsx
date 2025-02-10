@@ -22,11 +22,11 @@ function ProductManagement() {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const adminToken = localStorage.getItem("admin_token");
+      const kasirToken = localStorage.getItem("kasir_token");
       const response = await axios.get(
         "http://localhost:3001/api/products/toko",
         {
-          headers: { Authorization: `Bearer ${adminToken}` },
+          headers: { Authorization: `Bearer ${kasirToken}` },
         }
       );
       setProducts(response.data.data);
@@ -41,56 +41,56 @@ function ProductManagement() {
     }
   };
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  // const handleInputChange = (e) => {
+  //   setFormData({
+  //     ...formData,
+  //     [e.target.name]: e.target.value,
+  //   });
+  // };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!editingProduct) return;
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (!editingProduct) return;
 
-    setIsLoading(true);
-    try {
-      const adminToken = localStorage.getItem("admin_token");
-      await axios.patch(
-        `http://localhost:3001/api/products/toko/${editingProduct.product_id}/price`,
-        formData,
-        {
-          headers: { Authorization: `Bearer ${adminToken}` },
-        }
-      );
+  //   setIsLoading(true);
+  //   try {
+  //     const kasir_token = localStorage.getItem("kasir_token");
+  //     await axios.patch(
+  //       `http://localhost:3001/api/products/toko/${editingProduct.product_id}/price`,
+  //       formData,
+  //       {
+  //         headers: { Authorization: `Bearer ${kasir_token}` },
+  //       }
+  //     );
 
-      Swal.fire({
-        icon: "success",
-        title: "Berhasil",
-        text: "Harga jual berhasil diperbarui",
-        showConfirmButton: false,
-        timer: 1500,
-      });
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Berhasil",
+  //       text: "Harga jual berhasil diperbarui",
+  //       showConfirmButton: false,
+  //       timer: 1500,
+  //     });
 
-      setEditingProduct(null);
-      setFormData({ harga_jual: "" });
-      fetchProducts();
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Gagal",
-        text: error.response?.data?.message || "Terjadi kesalahan",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     setEditingProduct(null);
+  //     setFormData({ harga_jual: "" });
+  //     fetchProducts();
+  //   } catch (error) {
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Gagal",
+  //       text: error.response?.data?.message || "Terjadi kesalahan",
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  const handleEdit = (product) => {
-    setEditingProduct(product);
-    setFormData({
-      harga_jual: product.harga_jual,
-    });
-  };
+  // const handleEdit = (product) => {
+  //   setEditingProduct(product);
+  //   setFormData({
+  //     harga_jual: product.harga_jual,
+  //   });
+  // };
 
   const formatRupiah = (number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -220,9 +220,9 @@ function ProductManagement() {
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">
                     Harga Jual
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">
+                  {/* <th className="px-6 py-4 text-left text-sm font-medium text-gray-600">
                     Aksi
-                  </th>
+                  </th> */}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -256,14 +256,14 @@ function ProductManagement() {
                     <td className="px-6 py-4 text-sm text-gray-700">
                       {formatRupiah(tokoProduct.harga_jual)}
                     </td>
-                    <td className="px-6 py-4">
+                    {/* <td className="px-6 py-4">
                       <button
                         onClick={() => handleEdit(tokoProduct)}
                         className="text-blue-600 hover:text-blue-800"
                       >
                         <Edit size={18} />
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>

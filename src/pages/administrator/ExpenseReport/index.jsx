@@ -80,11 +80,11 @@ function ExpenseReport() {
             const endDateTime = new Date(endDate);
             endDateTime.setHours(23, 59, 59, 999);
 
-            const token = localStorage.getItem("token");
+            const adminToken = localStorage.getItem("admin_token");
             const response = await axios.get(
                 `http://localhost:3001/api/pembelian/report`,
                 {
-                    headers: { Authorization: `Bearer ${token}` },
+                    headers: { Authorization: `Bearer ${adminToken}` },
                     params: {
                         startDate: startDateTime.toISOString(),
                         endDate: endDateTime.toISOString()

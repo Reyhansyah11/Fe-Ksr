@@ -108,7 +108,7 @@ const PurchaseManagement = () => {
           />
         )}
 
-        <div className="bg-white rounded-xl shadow-sm my-10">
+        <div className="bg-white rounded-xl shadow-sm my-5">
           <div className="p-6 border-b">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />

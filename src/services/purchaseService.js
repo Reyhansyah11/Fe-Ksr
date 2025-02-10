@@ -5,10 +5,10 @@ const API_URL = "http://localhost:3001/api";
 
 export const getPurchases = async () => {
   try {
-    const token = localStorage.getItem("token");
+    const adminToken = localStorage.getItem("admin_token");
     // Ganti endpoint menjadi /pembelian
     const response = await axios.get(`${API_URL}/pembelian`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
     return response.data;
   } catch (error) {
@@ -19,9 +19,9 @@ export const getPurchases = async () => {
 
 export const getPurchasesById = async (purchaseId) => {
   try {
-    const token = localStorage.getItem("token");
+    const adminToken = localStorage.getItem("admin_token");
     const response = await axios.get(`${API_URL}/details/pembelian/${purchaseId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
     return response.data;
   } catch (error) {
@@ -32,9 +32,9 @@ export const getPurchasesById = async (purchaseId) => {
 
 export const getPurchasesByProductId = async (productId) => {
   try {
-    const token = localStorage.getItem("token");
+    const adminToken = localStorage.getItem("admin_token");
     const response = await axios.get(`${API_URL}/details/product/${productId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
     return response.data;
   } catch (error) {
@@ -46,9 +46,9 @@ export const getPurchasesByProductId = async (productId) => {
 
 export const getSupplierProducts = async (supplierId) => {
   try {
-    const token = localStorage.getItem("token");
+    const adminToken = localStorage.getItem("admin_token");
     const response = await axios.get(`${API_URL}/products/supplier/list/${supplierId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
     return response.data;
   } catch (error) {
@@ -59,9 +59,9 @@ export const getSupplierProducts = async (supplierId) => {
 
 export const createPurchase = async (purchaseData) => {
     try {
-      const token = localStorage.getItem("token");
+      const adminToken = localStorage.getItem("admin_token");
       const response = await axios.post(`${API_URL}/pembelian`, purchaseData, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
       console.log('Response dari backend di createPurchase:', response.data); // Debugging
       return response.data;

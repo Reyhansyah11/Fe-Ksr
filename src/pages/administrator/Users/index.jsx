@@ -36,11 +36,11 @@ function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const adminToken = localStorage.getItem("admin_token");
       const response = await axios.get(
         "http://localhost:3001/api/auth/kasirUsers",
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${adminToken}` },
         }
       );
       setUsers(response.data.users);
@@ -63,9 +63,9 @@ function UserManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
+      const adminToken = localStorage.getItem("admin_token");
       await axios.post("http://localhost:3001/api/auth/register", formData, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
       Swal.fire({
         icon: "success",

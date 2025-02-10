@@ -6,6 +6,7 @@ import productIcon from "../../public/icons/quality-product.png";
 import logoutIcon from "../../public/icons/log-out.png";
 import categoryIcon from "../../public/icons/shapes.png";
 import satuanIcon from "../../public/icons/box.png";
+import passwordIcon from "../../public/icons/forgot-password.png";
 
 const SidebarSupplier = ({ onLogout }) => {
   const location = useLocation();
@@ -30,6 +31,13 @@ const SidebarSupplier = ({ onLogout }) => {
       label: "Satuan",
       path: "/supplier/satuan",
       icon: <img src={satuanIcon} alt="satuan" className="w-5 h-5" />,
+    },
+    {
+      label: "Ganti Password",
+      path: "/supplier/change-password",
+      icon: (
+        <img src={passwordIcon} alt="change password" className="w-5 h-5" />
+      ),
     },
   ];
 
@@ -63,7 +71,9 @@ const SidebarSupplier = ({ onLogout }) => {
         <h1 className="text-xl font-bold text-gray-800">Supplier Panel</h1>
       </div>
 
-      <nav className="mt-6 px-2">
+      <nav className="mt-6 px-2 mb-20">
+        {" "}
+        {/* Tambahkan margin bottom untuk memberikan ruang ke tombol logout */}
         {menuItems.map((item, index) => {
           const isActive = location.pathname === item.path;
           return (

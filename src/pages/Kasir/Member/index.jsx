@@ -32,7 +32,7 @@ const MemberManagement = () => {
   const checkMemberStatus = async () => {
     try {
       const response = await axios.get(`${API_URL}/pelanggan/member/status`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem("kasir_token")}` },
       });
 
       if (response.data.status === "success") {
@@ -104,7 +104,7 @@ const MemberManagement = () => {
           {},
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+              Authorization: `Bearer ${localStorage.getItem("kasir_token")}`,
             },
           }
         );
@@ -131,7 +131,7 @@ const MemberManagement = () => {
   const fetchMembers = async () => {
     try {
       const response = await axios.get(`${API_URL}/pelanggan`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem("kasir_token")}` },
       });
       const memberData = response.data.data;
       setMembers(memberData);
@@ -159,7 +159,7 @@ const MemberManagement = () => {
         url,
         { ...formData, is_member: true },
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem("kasir_token")}` },
         }
       );
 
@@ -199,7 +199,7 @@ const MemberManagement = () => {
 
       if (result.isConfirmed) {
         await axios.delete(`${API_URL}/pelanggan/${memberId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem("kasir_token")}` },
         });
 
         Swal.fire("Terhapus!", "Member berhasil dihapus.", "success");
