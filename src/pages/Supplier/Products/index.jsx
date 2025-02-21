@@ -229,7 +229,7 @@ const fetchSatuan = async () => {
             </div>
 
             <div>
-              <label className="text-sm text-gray-600">Harga Beli</label>
+              <label className="text-sm text-gray-600">Harga Jual</label>
               <input
                 type="number"
                 name="harga_beli"
@@ -279,7 +279,7 @@ const fetchSatuan = async () => {
                   Isi
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Harga Beli
+                  Harga Jual
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
                   Aksi

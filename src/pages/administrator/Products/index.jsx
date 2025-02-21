@@ -104,11 +104,19 @@ function ProductManagement() {
     return harga_beli / isi;
   };
 
-  const filteredProducts = products.filter((product) =>
+  const filteredProducts = products
+  .filter((product) =>
     product.product?.product_name
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
-  );
+  )
+  .sort((a, b) => {
+    // Produk dengan stok 0 ditampilkan di awal
+    if (a.stok === 0 && b.stok !== 0) return -1;
+    if (a.stok !== 0 && b.stok === 0) return 1;
+    // Jika keduanya memiliki stok 0 atau keduanya memiliki stok, urutkan berdasarkan nama
+    return a.product?.product_name.localeCompare(b.product?.product_name);
+  });
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;

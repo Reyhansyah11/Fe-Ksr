@@ -1,3 +1,4 @@
+// pages/administrator/Dashboard/index.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -12,10 +13,13 @@ import {
 } from "recharts";
 import { Link } from "react-router-dom";
 import usersIcon from "../../../../public/icons/team-management.png";
-import ProductIcon from "../../../../public/icons/features.png"
-import supplierIcon from "../../../../public/icons/market-penetration.png"
-import memberIcon from "../../../../public/icons/membership.png"
+import ProductIcon from "../../../../public/icons/features.png";
+import supplierIcon from "../../../../public/icons/market-penetration.png";
+import memberIcon from "../../../../public/icons/membership.png";
+import Modal from "../../../components/Modal";
+import ImportDatabase from "../../../components/ImportDatabase";
 
+// Format helpers
 const formatToRupiah = (number) => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -33,6 +37,7 @@ const formatDate = (dateString) => {
 };
 
 function Dashboard() {
+  // States
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalMembers: 0,
@@ -42,7 +47,9 @@ function Dashboard() {
   const [weeklyExpenses, setWeeklyExpenses] = useState([]);
   const [weeklySales, setWeeklySales] = useState([]);
   const [recentMembers, setRecentMembers] = useState([]);
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
 
+  // Fetch data
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -124,6 +131,7 @@ function Dashboard() {
     fetchStats();
   }, []);
 
+  // Configuration objects
   const statItems = [
     {
       title: "Total Users",
@@ -135,13 +143,17 @@ function Dashboard() {
       title: "Active Products",
       value: stats.activeProducts,
       bgColor: "bg-[#fbbf24]",
-      icon: <img src={ProductIcon} alt="products" className="w-[45px] h-auto" />,
+      icon: (
+        <img src={ProductIcon} alt="products" className="w-[45px] h-auto" />
+      ),
     },
     {
       title: "Total Suppliers",
       value: stats.totalSuppliers,
       bgColor: "bg-green-500",
-      icon: <img src={supplierIcon} alt="supplier" className="w-[45px] h-auto" />,
+      icon: (
+        <img src={supplierIcon} alt="supplier" className="w-[45px] h-auto" />
+      ),
     },
     {
       title: "Total Members",
@@ -167,6 +179,12 @@ function Dashboard() {
       description: "Update product inventory",
       link: "/administrator/products",
     },
+    {
+      title: "Import Database",
+      description: "Restore database from backup",
+      onClick: () => setIsBackupModalOpen(true),
+      isButton: true,
+    },
   ];
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -187,9 +205,29 @@ function Dashboard() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">
-        Dashboard Overview
-      </h2>
+      {/* Header dengan tombol import */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">Dashboard Overview</h2>
+        <button
+          onClick={() => setIsBackupModalOpen(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+              flex items-center gap-2 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Import Database
+        </button>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -256,7 +294,7 @@ function Dashboard() {
           {/* Expenses Chart */}
           <div className="bg-white rounded-xl shadow-md p-6">
             <h3 className="text-xl font-semibold mb-6 text-gray-800">
-              Pengeluaran Minggu Ini
+              Pembelian Minggu Ini
             </h3>
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -328,22 +366,48 @@ function Dashboard() {
               Quick Actions
             </h3>
             <div className="grid gap-4">
-              {quickActions.map((action, index) => (
-                <Link
-                  to={action.link}
-                  key={index}
-                  className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <h4 className="font-semibold text-gray-800">
-                    {action.title}
-                  </h4>
-                  <p className="text-gray-500 text-sm">{action.description}</p>
-                </Link>
-              ))}
+              {quickActions.map((action, index) =>
+                action.isButton ? (
+                  <button
+                    key={index}
+                    onClick={action.onClick}
+                    className="block w-full p-4 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+                  >
+                    <h4 className="font-semibold text-gray-800">
+                      {action.title}
+                    </h4>
+                    <p className="text-gray-500 text-sm">
+                      {action.description}
+                    </p>
+                  </button>
+                ) : (
+                  <Link
+                    to={action.link}
+                    key={index}
+                    className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <h4 className="font-semibold text-gray-800">
+                      {action.title}
+                    </h4>
+                    <p className="text-gray-500 text-sm">
+                      {action.description}
+                    </p>
+                  </Link>
+                )
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Import Database Modal */}
+      <Modal
+        isOpen={isBackupModalOpen}
+        onClose={() => setIsBackupModalOpen(false)}
+        title="Import Database"
+      >
+        <ImportDatabase />
+      </Modal>
     </div>
   );
 }

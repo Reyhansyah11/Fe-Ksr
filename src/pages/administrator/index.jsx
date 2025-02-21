@@ -12,6 +12,10 @@ import TransactionIcon from "../../../public/icons/transaction.png";
 import SalesIcon from "../../../public/icons/business-growth.png";
 import MemberIcon from "../../../public/icons/member-card.png";
 import logoutIcon from "../../../public/icons/logout.png";
+import reportSales from "../../../public/icons/forecast.png";
+import CombineReportIcon from '../../../public/icons/data-analysis (1).png';
+import CashierLogo from "../../../public/icons/Smart Casier Rev.png"
+import CashierLogoClose from "../../../public/icons/Smart rev.png"
 
 function AdminDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -55,14 +59,14 @@ function AdminDashboard() {
 
   const transactionMenu = [
     {
-      label: "Purchase",
+      label: "Purchaser",
       path: "/administrator/purchase",
       icon: (
         <img src={purchaseIcon} alt="purchase" className="w-auto h-[20px]" />
       ),
     },
     {
-      label: "Transaction",
+      label: "Sale",
       path: "/administrator/transaction",
       icon: (
         <img
@@ -73,7 +77,7 @@ function AdminDashboard() {
       ),
     },
     {
-      label: "Expense Report",
+      label: "Purchase Report",
       path: "/administrator/expense-report",
       icon: (
         <img
@@ -87,6 +91,20 @@ function AdminDashboard() {
       label: "Sales Report",
       path: "/administrator/sales",
       icon: <img src={SalesIcon} alt="sales" className="w-auto h-[20px]" />,
+    },
+    // {
+    //   label: "Report Sales",
+    //   path: "/administrator/profit-loss-report",
+    //   icon: (
+    //     <img src={reportSales} alt="profit-loss-report" className="w-auto h-[20px]" />
+    //   ),
+    // },
+    {
+      label: "Financial Report",
+      path: "/administrator/combined-report",
+      icon: (
+        <img src={CombineReportIcon} alt="combined-report" className="w-auto h-[20px]" />
+      ),
     },
   ];
 
@@ -140,20 +158,16 @@ function AdminDashboard() {
           isSidebarOpen ? "w-64" : "w-20"
         }`}
       >
-        <div className="flex items-center justify-between p-6 border-b">
-          <h1
-            className={`text-xl font-bold ${
-              isSidebarOpen ? "block" : "hidden"
-            }`}
-          >
-            Admin Panel
-          </h1>
-          <button
+        <div className="flex lg:items-center items-start lg:justify-between lg:p-4 border-b">
+          {/* Sidebar Logo */}
+          <img
+            src={isSidebarOpen ? CashierLogo : CashierLogoClose}
+            alt="sales"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            {isSidebarOpen ? "×" : "☰"}
-          </button>
+            className={`w-[auto] h-[13px] lg:w-auto lg:h-[43px] cursor-pointer ${
+              isSidebarOpen ? "" : "mx-auto"
+            }`}
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">

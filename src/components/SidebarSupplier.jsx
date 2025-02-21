@@ -7,6 +7,7 @@ import logoutIcon from "../../public/icons/log-out.png";
 import categoryIcon from "../../public/icons/shapes.png";
 import satuanIcon from "../../public/icons/box.png";
 import passwordIcon from "../../public/icons/forgot-password.png";
+import CashierLogo from "../../public/icons/Smart Casier Rev.png"
 
 const SidebarSupplier = ({ onLogout }) => {
   const location = useLocation();
@@ -18,11 +19,6 @@ const SidebarSupplier = ({ onLogout }) => {
       icon: <img src={dashboardIcon} alt="dashboard" className="w-5 h-5" />,
     },
     {
-      label: "Products",
-      path: "/supplier/products",
-      icon: <img src={productIcon} alt="products" className="w-5 h-5" />,
-    },
-    {
       label: "Categories",
       path: "/supplier/categories",
       icon: <img src={categoryIcon} alt="categories" className="w-5 h-5" />,
@@ -31,6 +27,11 @@ const SidebarSupplier = ({ onLogout }) => {
       label: "Satuan",
       path: "/supplier/satuan",
       icon: <img src={satuanIcon} alt="satuan" className="w-5 h-5" />,
+    },
+    {
+      label: "Products",
+      path: "/supplier/products",
+      icon: <img src={productIcon} alt="products" className="w-5 h-5" />,
     },
     {
       label: "Ganti Password",
@@ -68,7 +69,8 @@ const SidebarSupplier = ({ onLogout }) => {
   return (
     <div className="fixed left-0 top-0 h-full bg-white text-gray-700 border-r shadow-lg w-64">
       <div className="p-6 border-b">
-        <h1 className="text-xl font-bold text-gray-800">Supplier Panel</h1>
+        {/* <h1 className="text-xl font-bold text-gray-800">Supplier Panel</h1> */}
+        <img src={CashierLogo} alt="sales" className="w-auto h-[43px]" />
       </div>
 
       <nav className="mt-6 px-2 mb-20">

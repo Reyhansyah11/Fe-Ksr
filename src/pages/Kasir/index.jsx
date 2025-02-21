@@ -7,6 +7,8 @@ import TransactionIcon from "../../../public/icons/transaction.png";
 import SalesIcon from "../../../public/icons/business-growth.png";
 import MemberIcon from "../../../public/icons/member-card.png";
 import logoutIcon from "../../../public/icons/logout.png";
+import CashierLogo from "../../../public/icons/Smart Casier Rev.png";
+import CashierLogoClose from "../../../public/icons/Smart rev.png";
 
 function KasirDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -25,13 +27,6 @@ function KasirDashboard() {
 
   const mainMenu = [
     {
-      label: "Transaksi",
-      path: "/kasir/transaction",
-      icon: (
-        <img src={TransactionIcon} alt="transaction" className="w-auto h-[20px]" />
-      ),
-    },
-    {
       label: "Member",
       path: "/kasir/members",
       icon: <img src={MemberIcon} alt="member" className="w-auto h-[20px]" />,
@@ -40,6 +35,17 @@ function KasirDashboard() {
       label: "Produk",
       path: "/kasir/products",
       icon: <img src={productIcon} alt="product" className="w-auto h-[20px]" />,
+    },
+    {
+      label: "Transaksi",
+      path: "/kasir/transaction",
+      icon: (
+        <img
+          src={TransactionIcon}
+          alt="transaction"
+          className="w-auto h-[20px]"
+        />
+      ),
     },
     {
       label: "Laporan Penjualan",
@@ -59,7 +65,7 @@ function KasirDashboard() {
       confirmButtonText: "Ya, Logout!",
       cancelButtonText: "Batal",
     });
-  
+
     if (result.isConfirmed) {
       try {
         const response = await fetch("http://localhost:3001/api/auth/logout", {
@@ -73,7 +79,7 @@ function KasirDashboard() {
           localStorage.removeItem("kasir_toko_id");
           localStorage.removeItem("kasir_user_id");
           localStorage.removeItem("kasir_user_name");
-  
+
           Swal.fire(
             "Berhasil!",
             "Anda telah keluar dari sistem.",
@@ -98,20 +104,16 @@ function KasirDashboard() {
           isSidebarOpen ? "w-64" : "w-20"
         }`}
       >
-        <div className="flex items-center justify-between p-6 border-b">
-          <h1
-            className={`text-xl font-bold ${
-              isSidebarOpen ? "block" : "hidden"
-            }`}
-          >
-            Kasir Panel
-          </h1>
-          <button
+        <div className="flex lg:items-center items-start lg:justify-between lg:p-4 border-b">
+          {/* Sidebar Logo */}
+          <img
+            src={isSidebarOpen ? CashierLogo : CashierLogoClose}
+            alt="sales"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            {isSidebarOpen ? "×" : "☰"}
-          </button>
+            className={`w-[auto] h-[13px] lg:w-auto lg:h-[43px] cursor-pointer ${
+              isSidebarOpen ? "" : "mx-auto"
+            }`}
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
